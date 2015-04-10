@@ -3,10 +3,6 @@ require "uri"
 require "openssl"
 require "base64"
 
-# urlsign
-require "distack/urlsign/signer"
-require "distack/urlsign/version"
-
 module Distack
   module URLSign
     def self.strip_heredoc(string)
@@ -16,3 +12,7 @@ module Distack
     end
   end
 end
+
+# urlsign
+require "distack/urlsign/signer"
+require "distack/urlsign/version"
