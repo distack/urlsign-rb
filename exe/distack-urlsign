@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "distack/urlsign"
+
+key, url = ARGV
+
+if key.nil? || url.nil?
+  puts Distack::URLSign.strip_heredoc <<-EOF
+    Usage: #{$0} <key> <url>
+
+    Calculates a HMAC signature for the URL using the provided key.
+    Prints the url with the _signature parameter.
+
+  EOF
+
+  exit(1)
+end
+
+puts Distack::URLSign::Signer.new(key).sign(URI.parse(url))
