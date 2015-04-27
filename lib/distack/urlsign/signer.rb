@@ -28,7 +28,6 @@ module Distack::URLSign
       end
 
       q << ["_signature", signature]
-      q.sort_by! { |(n,v)| n }
 
       new_url = url.dup
       new_url.query = URI.encode_www_form(q)
