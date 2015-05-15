@@ -15,7 +15,8 @@ module Distack::URLSign
         raise "can't sign or verify opaque URL"
       end
 
-      chunks = [url.scheme, "#{url.host}:#{url.port}", url.path, url.query, url.userinfo].compact
+      host_with_port = url.port == url.default_port ? url.host : "#{url.host}:#{url.port}"
+      chunks = [url.scheme, host_with_port, url.path, url.query, url.userinfo].compact
       digest = OpenSSL::Digest.new("sha512")
 
       rawsig    = OpenSSL::HMAC.digest(digest, @key, chunks.join)
