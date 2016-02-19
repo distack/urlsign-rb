@@ -2,6 +2,7 @@
 require "uri"
 require "openssl"
 require "base64"
+require "rack"
 
 module Distack
   module URLSign
