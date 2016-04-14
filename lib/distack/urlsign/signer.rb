@@ -54,13 +54,35 @@ module Distack::URLSign
       rawsig    = OpenSSL::HMAC.digest(digest, @key, chunks.join)
       signature = Base64.urlsafe_encode64(rawsig)
 
-      if signature == q["_signature"]
+      if secure_compare(signature, q["_signature"])
         new_url = url.dup
         new_url.query = original_qs
         new_url
       else
         raise InvalidSignatureError, "signature is invalid for #{url}"
       end
+    end
+
+    private
+
+    # Constant time string comparison.
+    #
+    # The values compared should be of fixed length, such as strings
+    # that have already been processed by HMAC. This should not be used
+    # on variable length plaintext strings because it could leak length info
+    # via timing attacks.
+    #
+    # Copied from ActiveSupport
+    #
+    # https://github.com/rails/rails/blob/036bbda9eb3b3885223d53646777733a1547d89a/activesupport/lib/active_support/security_utils.rb#L11-L19
+    def secure_compare(a, b)
+      return false unless a.bytesize == b.bytesize
+
+      l = a.unpack "C#{a.bytesize}"
+
+      res = 0
+      b.each_byte { |byte| res |= byte ^ l.shift }
+      res == 0
     end
   end
 end
