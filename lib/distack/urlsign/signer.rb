@@ -52,7 +52,8 @@ module Distack::URLSign
 
       original_qs = Rack::Utils.build_nested_query(original_q)
 
-      chunks = [url.scheme, "#{url.host}:#{url.port}", url.path, original_qs, url.userinfo].compact
+      host_with_port = url.port == url.default_port ? url.host : "#{url.host}:#{url.port}"
+      chunks = [url.scheme, host_with_port, url.path, original_qs, url.userinfo].compact
       digest = OpenSSL::Digest.new("sha512")
 
       rawsig    = OpenSSL::HMAC.digest(digest, @key, chunks.join)
