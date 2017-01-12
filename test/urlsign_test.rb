@@ -13,4 +13,16 @@ class Distack::URLSignTest < Minitest::Test
     signed_url = signer.sign(url)
     assert_equal signer.verify(signed_url), url
   end
+
+  def test_valid
+    url = URI.parse("http://foo.test:3000/path?search")
+    key = "a1b2c3d4f5"
+
+    signer = Distack::URLSign::Signer.new(key)
+    signed_url = signer.sign(url)
+
+
+    assert_equal signer.valid?(url), false
+    assert_equal signer.valid?(signed_url), true
+  end
 end

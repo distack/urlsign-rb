@@ -68,6 +68,12 @@ module Distack::URLSign
       end
     end
 
+    def valid?(url)
+      !!verify(url)
+    rescue InvalidSignatureError, MissingSignatureError
+      false
+    end
+
     private
 
     # Constant time string comparison.
