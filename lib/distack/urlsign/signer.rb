@@ -59,7 +59,7 @@ module Distack::URLSign
       rawsig    = OpenSSL::HMAC.digest(digest, @key, chunks.join)
       signature = Base64.urlsafe_encode64(rawsig)
 
-      if secure_compare(signature, q["_signature"])
+      if secure_compare(signature, URI.decode(q["_signature"]).to_s)
         new_url = url.dup
         new_url.query = original_qs
         new_url
