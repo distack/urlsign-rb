@@ -1,5 +1,7 @@
 module Distack::URLSign
   InvalidSignatureError = Class.new(StandardError)
+  MissingSignatureError = Class.new(StandardError)
+
 
   class Signer
     KEY_REGEX = /^[0-9A-f]+$/
@@ -43,6 +45,7 @@ module Distack::URLSign
       end
 
       q = Rack::Utils.parse_nested_query(url.query)
+      raise MissingSignatureError unless q["_signature"]
 
       original_q  = q.dup
       original_q.delete("_signature")
