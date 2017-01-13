@@ -1,5 +1,7 @@
 module Distack::URLSign
   InvalidSignatureError = Class.new(StandardError)
+  MissingSignatureError = Class.new(StandardError)
+
 
   class Signer
     KEY_REGEX = /^[0-9A-f]+$/
@@ -43,25 +45,33 @@ module Distack::URLSign
       end
 
       q = Rack::Utils.parse_nested_query(url.query)
+      raise MissingSignatureError unless q["_signature"]
 
       original_q  = q.dup
       original_q.delete("_signature")
 
       original_qs = Rack::Utils.build_nested_query(original_q)
 
-      chunks = [url.scheme, "#{url.host}:#{url.port}", url.path, original_qs, url.userinfo].compact
+      host_with_port = url.port == url.default_port ? url.host : "#{url.host}:#{url.port}"
+      chunks = [url.scheme, host_with_port, url.path, original_qs, url.userinfo].compact
       digest = OpenSSL::Digest.new("sha512")
 
       rawsig    = OpenSSL::HMAC.digest(digest, @key, chunks.join)
       signature = Base64.urlsafe_encode64(rawsig)
 
-      if secure_compare(signature, q["_signature"])
+      if secure_compare(signature, URI.decode(q["_signature"]).to_s)
         new_url = url.dup
         new_url.query = original_qs
         new_url
       else
         raise InvalidSignatureError, "signature is invalid for #{url}"
       end
+    end
+
+    def valid?(url)
+      !!verify(url)
+    rescue InvalidSignatureError, MissingSignatureError
+      false
     end
 
     private
